@@ -1,0 +1,46 @@
+{
+  "name": "playcat/queue-tpswoole",
+  "description": "playcat queue with swoole for thinkphp",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "CGI.NET",
+      "email": "root@playcat.net",
+      "homepage": "https://blog.playcat.net"
+    }
+  ],
+  "require": {
+    "php": ">7.2",
+    "ext-swoole": ">=4.8.13",
+    "swoole/ide-helper": "^4.3",
+    "topthink/framework": "^6.0",
+    "playcat/queue-base": "@dev"
+  },
+  "require-dev": {
+  },
+  "autoload": {
+    "psr-4": {
+      "Playcat\\Queue\\Tpswoole\\": "src"
+    },
+    "files": [
+    ]
+  },
+  "extra": {
+    "think": {
+      "services": [
+        "Playcat\\Queue\\Tpswoole\\Process\\Service"
+      ],
+      "config": {
+        "playcatqueue": "src/Config/playcatqueue.php"
+      }
+    }
+  },
+  "config": {
+    "preferred-install": "dist",
+    "sort-packages": true,
+    "platform-check": false,
+    "platform": {
+      "ext-swoole": "4.8.13"
+    }
+  }
+}
