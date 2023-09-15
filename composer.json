@@ -11,12 +11,11 @@
   ],
   "require": {
     "php": ">7.2",
-    "ext-swoole": ">=4.8.13",
-    "swoole/ide-helper": "^4.3",
     "topthink/framework": "^6.0",
-    "playcat/queue-base": "@dev"
+    "playcat/queue-base": "^1.0"
   },
   "require-dev": {
+    "swoole/ide-helper": "^4.3"
   },
   "autoload": {
     "psr-4": {
