@@ -130,8 +130,9 @@ $id = Manager::getInstance()->push($payload_delay);`
 **Playcat\Queue\Exceptions\DontRetry**异常会忽略掉重试
 
 
-###其它
-注意事项：所有消费任务内默认是开启协程并且不可关闭,有些操作与常规模式是有区别的。如果没有接触过协程或开发过程中发现问题建议先看下swoole的相关文档。
+### 其它
+
+注意：所有执行的消费任务默认是开启协程并且不可关闭的。由于与常规模式执行有点区别,所以可能出现一些不是预期的情况。如果没有接触过协程或开发过程中发现问题建议先看下swoole的相关文档。
 
 如果你希望使用常规多进程的方式可以使用下面的
 [playcat-queue ](https://github.com/nsnake/playcat-queue)
