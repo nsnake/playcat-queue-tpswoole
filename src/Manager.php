@@ -25,10 +25,9 @@ class Manager implements DriverInterface
     public function __construct()
     {
         $this->config = Config::get('playcatqueue.Manager');
-
     }
 
-    private function getTimeClient(): TimerClient
+    protected function getTimeClient(): TimerClient
     {
         if (!$this->timer_client) {
             $this->timer_client = TimerClient::getInstance(['timerserver' => $this->config['timerserver']]);
@@ -36,7 +35,7 @@ class Manager implements DriverInterface
         return $this->timer_client;
     }
 
-    private function getProducer(): DriverInterface
+    protected function getProducer(): DriverInterface
     {
         if (!$this->driver
             || !is_a($this->driver, 'Playcat\Queue\Driver\DriverInterface', true)) {
@@ -54,7 +53,7 @@ class Manager implements DriverInterface
                 default:
                     $driver_name = Config::get('playcatqueue.Redis');
             }
-            $this->driver = new ($this->config['driver']($driver_name));
+            $this->driver = new $this->config['driver']($driver_name);
         }
         return $this->driver;
     }
