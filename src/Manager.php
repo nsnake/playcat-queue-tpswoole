@@ -3,15 +3,16 @@
 namespace Playcat\Queue\Tpswoole;
 
 use Playcat\Queue\Protocols\ConsumerDataInterface;
-use Playcat\Queue\Protocols\DriverInterface;
+use Playcat\Queue\Driver\DriverInterface;
 use Playcat\Queue\Protocols\ProducerDataInterface;
 use think\facade\Config;
 
 class Manager implements DriverInterface
 {
     protected static $instance;
-    protected $driver;
-    private $timer_client;
+    private array $config;
+    private DriverInterface $driver;
+    private TimerClient $timer_client;
 
     public static function getInstance(): self
     {
@@ -23,53 +24,67 @@ class Manager implements DriverInterface
 
     public function __construct()
     {
-        $config = Config::get('playcatqueue.Manager');
-        $driver_config = [];
-        switch ($config['driver']) {
-            case 'Playcat\Queue\Driver\Rediscluster':
-                $driver_config = Config::get('playcatqueue.Rediscluster');
-                break;
-            case 'Playcat\Queue\Driver\Kafka':
-                $driver_config = Config::get('playcatqueue.Kafka');
-                break;
-            case 'Playcat\Queue\Driver\RabbitMQ':
-                $driver_config = Config::get('playcatqueue.Rabbitmq');
-                break;
-            default:
-                $driver_config = Config::get('playcatqueue.Redis');
-        }
+        $this->config = Config::get('playcatqueue.Manager');
 
-        $this->driver = new $config['driver']($driver_config);
-        $this->timer_client = TimerClient::getInstance([
-            'timerserver' => $config['timerserver']]);
     }
 
+    private function getTimeClient(): TimerClient
+    {
+        if (!$this->timer_client) {
+            $this->timer_client = TimerClient::getInstance([
+                'timerserver' => $this->config['timerserver']]);
+        }
+        return $this->timer_client;
+    }
+
+    private function getProducer(): DriverInterface
+    {
+        if (!$this->driver
+            || !is_a($this->driver, 'Playcat\Queue\Driver\DriverInterface', true)) {
+            $driver_name = [];
+            switch ($this->config['driver']) {
+                case 'Playcat\Queue\Driver\Rediscluster':
+                    $driver_name = Config::get('playcatqueue.Rediscluster');
+                    break;
+                case 'Playcat\Queue\Driver\Kafka':
+                    $driver_name = Config::get('playcatqueue.Kafka');
+                    break;
+                case 'Playcat\Queue\Driver\RabbitMQ':
+                    $driver_name = Config::get('playcatqueue.Rabbitmq');
+                    break;
+                default:
+                    $driver_name = Config::get('playcatqueue.Redis');
+            }
+            $this->driver = new ($this->config['driver']($driver_name));
+        }
+        return $this->driver;
+    }
 
     public function setIconicId(int $iconic_id = 0): void
     {
-        $this->driver->setIconicId($iconic_id);
+        $this->getProducer()->setIconicId($iconic_id);
     }
 
     public function subscribe(array $channels): bool
     {
-        return $this->driver->subscribe($channels);
+        return $this->getProducer()->subscribe($channels);
     }
 
 
     public function shift(): ?ConsumerDataInterface
     {
-        return $this->driver->shift();
+        return $this->getProducer()->shift();
     }
 
     public function push(ProducerDataInterface $payload): ?string
     {
         return $payload->getDelayTime() > 0
-            ? $this->timer_client->send($payload) : $this->driver->push($payload);
+            ? $this->getTimeClient()->send($payload) : $this->getProducer()->push($payload);
     }
 
     public function consumerFinished(): bool
     {
-        return $this->driver->consumerFinished();
+        return $this->getProducer()->consumerFinished();
     }
 
 }
