@@ -10,9 +10,9 @@ use think\facade\Config;
 class Manager implements DriverInterface
 {
     protected static $instance;
-    private array $config;
-    private DriverInterface $driver;
-    private TimerClient $timer_client;
+    private  $config;
+    private  $driver;
+    private  $timer_client;
 
     public static function getInstance(): self
     {
@@ -31,8 +31,7 @@ class Manager implements DriverInterface
     private function getTimeClient(): TimerClient
     {
         if (!$this->timer_client) {
-            $this->timer_client = TimerClient::getInstance([
-                'timerserver' => $this->config['timerserver']]);
+            $this->timer_client = TimerClient::getInstance(['timerserver' => $this->config['timerserver']]);
         }
         return $this->timer_client;
     }
