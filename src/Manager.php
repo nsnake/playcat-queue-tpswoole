@@ -38,7 +38,7 @@ class Manager implements DriverInterface
     protected function getProducer(): DriverInterface
     {
         if (!$this->driver
-            || !is_a($this->driver, 'Playcat\Queue\Driver\DriverInterface', true)) {
+            || !$this->driver instanceof DriverInterface) {
             $driver_name = [];
             switch ($this->config['driver']) {
                 case 'Playcat\Queue\Driver\Rediscluster':

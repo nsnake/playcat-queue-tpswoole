@@ -16,10 +16,13 @@ use Playcat\Queue\Protocols\ProducerData;
 use Playcat\Queue\Protocols\TimerClientProtocols;
 use Playcat\Queue\Tpswoole\Process\ProcessManager;
 use Playcat\Queue\Tpswoole\Manager;
+use Playcat\Queue\TimerServer\Storage;
 
 class TimerServer extends ProcessManager
 {
     private $manager;
+    private $storage;
+    private $iconic_id;
 
     public function configure(): void
     {
@@ -33,6 +36,8 @@ class TimerServer extends ProcessManager
         $this->config = Config::get('playcatqueue.TimerServer');
         $this->setPidFile($this->config['pid_file']);
         $this->manager = Manager::getInstance();
+        $this->storage = new Storage();
+        $this->storage->setDriver($this->config['storage']);
     }
 
     /**
@@ -88,7 +93,8 @@ class TimerServer extends ProcessManager
     protected function startServer(array $config): void
     {
         @cli_set_process_title('playcatQueueTimerServer: master process');
-        $this->setPid(posix_getpid());
+        $this->iconic_id = posix_getpid();
+        $this->setPid($this->iconic_id);
         $pool = new Process\Pool($config['count']);
         $pool->set([
             'enable_coroutine' => true,
@@ -145,10 +151,16 @@ class TimerServer extends ProcessManager
      */
     private function cmdPush(ProducerData $payload): int
     {
-        return Timer::after($payload->getDelayTime() * 1000, function (ProducerData $payload) {
+        $jid = $this->storage->addData($this->iconic_id, $payload->getDelayTime(), $payload);
+        $timer_id = Timer::after($payload->getDelayTime() * 1000, function (int $j_id, Storage $storage) {
+            $db_data = $storage->getDataById($j_id);
+            $payload = $db_data['data'];
             $payload->setDelayTime();
             $this->manager->push($payload);
-        }, $payload);
+            $storage->delData($j_id);
+        }, $jid, $this->storage);
+        $this->storage->upData($jid, $timer_id);
+        return $jid;
     }
 
     /**
