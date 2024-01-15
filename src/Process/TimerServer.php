@@ -152,12 +152,13 @@ class TimerServer extends ProcessManager
     private function cmdPush(ProducerData $payload): int
     {
         $jid = $this->storage->addData($this->iconic_id, $payload->getDelayTime(), $payload);
-        $timer_id = Timer::after($payload->getDelayTime() * 1000, function (int $j_id, Storage $storage) {
-            $db_data = $storage->getDataById($j_id);
+        $timer_id = Timer::after($payload->getDelayTime() * 1000, function (int $jid, Storage $storage) {
+            $db_data = $storage->getDataById($jid);
             $payload = $db_data['data'];
             $payload->setDelayTime();
-            $this->manager->push($payload);
-            $storage->delData($j_id);
+            if ($this->manager->push($payload)) {
+                $storage->delData($jid);
+            }
         }, $jid, $this->storage);
         $this->storage->upData($jid, $timer_id);
         return $jid;
