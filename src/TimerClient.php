@@ -3,7 +3,6 @@
 namespace Playcat\Queue\Tpswoole;
 
 use Swoole\Coroutine\Client;
-use Dotenv\Exception\ValidationException;
 use Playcat\Queue\Exceptions\ConnectFailExceptions;
 use Playcat\Queue\Protocols\ProducerData;
 use Playcat\Queue\Protocols\TimerClientProtocols;
@@ -55,7 +54,7 @@ class TimerClient
     }
 
 
-    public function send(ProducerData $payload): string
+    public function push(ProducerData $payload): string
     {
         try {
             $protocols = new TimerClientProtocols();
@@ -67,6 +66,21 @@ class TimerClient
             return $result['code'] == 200 ? $result['data'] : '';
         } catch (ConnectFailExceptions $e) {
             return '';
+        }
+    }
+
+    public function del(ProducerData $payload): bool
+    {
+        try {
+            $protocols = new TimerClientProtocols();
+            $protocols->setCMD(TimerClientProtocols::CMD_DEL);
+            $protocols->setPayload($payload);
+            $this->client()->send(serialize($protocols) . "\r\n");
+            $result = $this->client()->recv();
+            $result = json_decode($result, true);
+            return $result['code'] == 200 ? true : false;
+        } catch (ConnectFailExceptions $e) {
+            return false;
         }
     }
 

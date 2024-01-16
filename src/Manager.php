@@ -10,9 +10,9 @@ use think\facade\Config;
 class Manager implements DriverInterface
 {
     protected static $instance;
-    private  $config;
-    private  $driver;
-    private  $timer_client;
+    private $config;
+    private $driver;
+    private $timer_client;
 
     public static function getInstance(): self
     {
@@ -77,12 +77,17 @@ class Manager implements DriverInterface
     public function push(ProducerDataInterface $payload): ?string
     {
         return $payload->getDelayTime() > 0
-            ? $this->getTimeClient()->send($payload) : $this->getProducer()->push($payload);
+            ? $this->getTimeClient()->push($payload) : $this->getProducer()->push($payload);
     }
 
     public function consumerFinished(): bool
     {
         return $this->getProducer()->consumerFinished();
+    }
+
+    public function del(ProducerDataInterface $payload): bool
+    {
+        return $this->getTimeClient()->del($payload);
     }
 
 }

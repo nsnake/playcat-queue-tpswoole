@@ -131,6 +131,7 @@ class TimerServer extends ProcessManager
                                 $result = $this->cmdPush($protocols->getPayload());
                                 break;
                             case TimerClientProtocols::CMD_DEL:
+                                $result = $this->cmdDel($protocols->getPayload());
                                 break;
                         }
 
@@ -162,6 +163,21 @@ class TimerServer extends ProcessManager
         }, $jid, $this->storage);
         $this->storage->upData($jid, $timer_id);
         return $jid;
+    }
+
+    /**
+     * @param int $jid
+     * @return int
+     */
+    private function cmdDel(ProducerData $payload): int
+    {
+        $jid = intval($payload->getID());
+        $db_data = $this->storage->getDataById($jid);
+        if ($db_data && $db_data['timerid']) {
+            Timer::clear($db_data['timerid']);
+            return $this->storage->delData($jid);
+        }
+        return 1;
     }
 
     /**
