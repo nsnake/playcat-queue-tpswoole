@@ -16,8 +16,6 @@ return [
         'bind_ip' => '127.0.0.1',
         'bind_port' => 6678,
         'pid_file' => '/tmp/playcat_timeserver.pid',
-        // 服务进程数
-        'count' => 1,
         'storage' => [
             'default' => 'sqlite',
             'connections' => [

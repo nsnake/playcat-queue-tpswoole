@@ -93,21 +93,21 @@ class TimerServer extends ProcessManager
     protected function startServer(array $config): void
     {
         @cli_set_process_title('playcatQueueTimerServer: master process');
-        $this->iconic_id = posix_getpid();
-        $this->setPid($this->iconic_id);
-        $pool = new Process\Pool($config['count']);
+        $this->setPid(posix_getpid());
+        $pool = new Process\Pool(1);
         $pool->set([
             'enable_coroutine' => true,
             'open_eof_check' => true,
             'package_eof' => "\r\n"
         ]);
-        $pool->on('workerStart', function ($pool, $id) use ($config) {
+        $pool->on('workerStart', function ($pool, $workerid) use ($config) {
             @cli_set_process_title('playcatQueueTimerServer: worker process');
+            $this->iconic_id = $workerid;
+            $this->loadUndoJobs();
             $server = new \Swoole\Coroutine\Server($config['bind_ip'], $config['bind_port'], false, true);
             Process::signal(SIGTERM, function () use ($server) {
                 $server->shutdown();
             });
-
             $server->handle(function (Connection $connection) {
                 while (true) {
                     $data = $connection->recv();
@@ -134,10 +134,8 @@ class TimerServer extends ProcessManager
                                 $result = $this->cmdDel($protocols->getPayload());
                                 break;
                         }
-
                     }
                     $connection->send($this->resultData($result));
-                    Coroutine::sleep(1);
                 }
             });
             $server->start();
@@ -172,12 +170,15 @@ class TimerServer extends ProcessManager
     private function cmdDel(ProducerData $payload): int
     {
         $jid = intval($payload->getID());
-        $db_data = $this->storage->getDataById($jid);
-        if ($db_data && $db_data['timerid']) {
-            Timer::clear($db_data['timerid']);
-            return $this->storage->delData($jid);
+        $result = 1;
+        if ($jid && $jid > 0) {
+            $db_data = $this->storage->getDataById($jid);
+            if ($db_data && $db_data['timerid']) {
+                Timer::clear($db_data['timerid']);
+                $result = $this->storage->delData($jid);
+            }
         }
-        return 1;
+        return $result;
     }
 
     /**
@@ -189,5 +190,24 @@ class TimerServer extends ProcessManager
     private function resultData(string $data = '', int $code = 200, string $msg = 'ok'): string
     {
         return json_encode(['code' => $code, 'msg' => $msg, 'data' => $data]) . "\r\n";
+    }
+
+    /**
+     * @return void
+     */
+    private function loadUndoJobs(): void
+    {
+        $jobs = $this->storage->getHistoryJobs();
+        foreach ($jobs as $job) {
+            $left_time = $job['expiration'] - time();
+            $payload = $job['data'];
+            if ($left_time < 5) {
+                $payload->setDelayTime();
+                $this->manager->push($payload);
+            } else {
+                $this->cmdPush($payload);
+            }
+            $this->storage->delData($job['jid']);
+        }
     }
 }

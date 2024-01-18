@@ -1,14 +1,16 @@
 
 <h1 align="center">Playcat\Queue\Tpswoole</h1>
 
-<p align="center">基于Thinkphp和Swoole协程的消息队列服务
+<p align="center">基于Thinkphp6+和Swoole4+协程的消息队列服务
 支持 Redis、Kafka 和 RabbitMQ。 支持延迟消息和异常重试</p>
 
-## 支持的消息系统
+## 特性
 
-- Redis和Redis集群 (redis >= 5.0)
-- Kafka (最新版)
-- RabbitMQ (最新版)
+- Redis单机或集群 (redis >= 5.0)
+- Kafka 
+- RabbitMQ
+- 延迟消息数据持久化，重启TimerServer将不再丢失未完成的任务
+- 支持延迟消息的删除
 
 ## 扩展要求
 
@@ -19,7 +21,7 @@
 - PHP php-amqplib/php-amqplib(RabbitMQ)
 
 ## 安装
-在你自己的Thinkphp项目下执行
+在Thinkphp项目下执行
 ```shell
 $ composer require "playcat/queue-tpswoole"
 ```
