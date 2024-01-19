@@ -29,7 +29,16 @@ $ composer require "playcat/queue-tpswoole"
 ## 使用方法
 
 ### 1.配置
-编辑TP项目下的*config\playcatqueue.php*文件,修改对应的信息为你自己对应的配置
+
+#### 1.1
+编辑TP项目下的*config\playcatqueue.php*文件,修改对应的信息为你自己对应的配置。
+
+#### 1.2 导入数据库
+根据TimerServer的下的storage type来决定使用的数据库。
+
+如果使用sqlite则拷贝`vendor\playcat\queue-base\db\playcatqueue`到你希望的的路径,例如`/opt/playcatqueue`,并修改`database`字段的类容为`/opt/playcatqueue`.
+
+如使用mysql(推荐)。则导入`vendor\playcat\queue-base\db\playcatqueue.sql`创建对应数据库
 
 ### 2.创建你自己消费者任务
 
@@ -52,7 +61,7 @@ class 你的文件名 implements ConsumerInterface
     {
         //获取发布到队列时传入的内容
         $data = $payload->getQueueData();
-        //sendsms or sendmail and so son.
+        //sendsms or sendmail and so on.
     }
 }
 
@@ -99,23 +108,25 @@ class 你的文件名 implements ConsumerInterface
 ```php
 use Playcat\Queue\Manager;
 use Playcat\Queue\Protocols\ProducerData;
-//即时消费消息
-$payload = new ProducerData();
-//对应消费队列里的任务名称
-$payload->setChannel('test');
-//对应消费队列里的任务使用的数据
-$payload->setQueueData([1,2,3,4]);
-//推入队列并且获取消息id
-$id = Manager::getInstance()->push($payload);
+go(function () {
+  //即时消费消息
+  $payload = new ProducerData();
+  //对应消费队列里的任务名称
+  $payload->setChannel('test');
+  //对应消费队列里的任务使用的数据
+  $payload->setQueueData([1,2,3,4]);
+  //推入队列并且获取消息id
+  $id = Manager::getInstance()->push($payload);
 
-//延迟消费消息
-$payload_delay = new ProducerData();
-$payload_delay->setChannel('test');
-$payload_delay->setQueueData([6,7,8,9]);
-//设置60秒后执行的任务
-$payload_delay->setDelayTime(60);
-//推入队列并且获取消息id
-$id = Manager::getInstance()->push($payload_delay);`
+  //延迟消费消息
+  $payload_delay = new ProducerData();
+  $payload_delay->setChannel('test');
+  $payload_delay->setQueueData([6,7,8,9]);
+  //设置60秒后执行的任务
+  $payload_delay->setDelayTime(60);
+  //推入队列并且获取消息id
+  $id = Manager::getInstance()->push($payload_delay);
+ });
 ```
 
 ### ProducerData方法
@@ -136,7 +147,7 @@ $id = Manager::getInstance()->push($payload_delay);`
 
 注意：所有执行的消费任务默认是开启协程并且不可关闭的。由于与常规模式执行有点区别,所以可能出现一些不是预期的情况。如果没有接触过协程或开发过程中发现问题建议先看下swoole的相关文档。
 
-如果你希望使用常规多进程的方式可以使用下面的
+基于webman的playcat queue
 [playcat-queue ](https://github.com/nsnake/playcat-queue)
 
 QQ:318274085

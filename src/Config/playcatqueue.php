@@ -17,31 +17,18 @@ return [
         'bind_port' => 6678,
         'pid_file' => '/tmp/playcat_timeserver.pid',
         'storage' => [
-            'default' => 'sqlite',
-            'connections' => [
-                'sqlite' => [
-                    // 数据库类型
-                    'type' => 'sqlite',
-                    // 数据库名
-                    'database' => 'playcatqueue',
-                ],
-                'mysql' => [
-                    // 数据库类型
-                    'type' => 'mysql',
-                    // 服务器地址
-                    'hostname' => '127.0.0.1',
-                    // 数据库名
-                    'database' => 'playcatqueue',
-                    // 数据库用户名
-                    'username' => 'root',
-                    // 数据库密码
-                    'password' => '',
-                    // 数据库连接端口
-                    'hostport' => '',
-                    // 数据库编码默认采用utf8
-                    'charset' => 'utf8',
-                ]
-            ]
+            // 数据库类型,支持sqlite,mysql
+            'type' => 'mysql',
+            // 服务器地址
+            'hostname' => '127.0.0.1',
+            // 数据库名
+            'database' => 'playcatqueue',
+            // 数据库用户名
+            'username' => 'root',
+            // 数据库密码
+            'password' => '',
+            // 数据库连接端口
+            'hostport' => ''
         ]
     ],
     'Manager' => [

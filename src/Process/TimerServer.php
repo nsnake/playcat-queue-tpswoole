@@ -59,11 +59,11 @@ class TimerServer extends ProcessManager
     private function start(): void
     {
         if ($this->processIsRunning()) {
-            $this->output->error('Playcat queue timer server process is already running.');
+            $this->output->error('Playcat queue timerserver process is already running.');
             return;
         }
 
-        $this->output->writeln('Starting playcat timer server...');
+        $this->output->writeln('Starting playcat timerserver...');
         $this->output->writeln('You can exit with <info>`CTRL-C`</info>');
         $this->startServer($this->config);
     }
@@ -73,7 +73,7 @@ class TimerServer extends ProcessManager
      */
     private function reload(): void
     {
-        $this->output->info('Reload playcat queue timer server...');
+        $this->output->info('Reload playcat queue timerserver...');
         $this->reloadProcess();
     }
 
@@ -82,7 +82,7 @@ class TimerServer extends ProcessManager
      */
     private function stop(): void
     {
-        $this->output->info('Stop playcat queue timer server...');
+        $this->output->info('Stop playcat queue timerserver...');
         $this->stopProcess();
     }
 
@@ -205,6 +205,7 @@ class TimerServer extends ProcessManager
                 $payload->setDelayTime();
                 $this->manager->push($payload);
             } else {
+                $payload->setDelayTime($left_time);
                 $this->cmdPush($payload);
             }
             $this->storage->delData($job['jid']);

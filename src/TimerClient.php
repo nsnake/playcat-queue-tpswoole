@@ -53,35 +53,47 @@ class TimerClient
         return self::$client;
     }
 
+    /**
+     * @param string $command
+     * @param ProducerData $payload
+     * @return array
+     */
+    private function sendCommand(string $command, ProducerData $payload): array
+    {
+        $result = [];
+        try {
+            $protocols = new TimerClientProtocols();
+            $protocols->setCMD($command);
+            $protocols->setPayload($payload);
+            $this->client()->send(serialize($protocols) . "\r\n");
+            $result = $this->client()->recv();
+            $result = json_decode($result, true) ?? [];
+        } catch (ConnectFailExceptions $e) {
+        }
+        return $result;
+    }
 
+    /**
+     * join a delay message
+     * @param ProducerData $payload
+     * @return string
+     */
     public function push(ProducerData $payload): string
     {
-        try {
-            $protocols = new TimerClientProtocols();
-            $protocols->setCMD(TimerClientProtocols::CMD_PUSH);
-            $protocols->setPayload($payload);
-            $this->client()->send(serialize($protocols) . "\r\n");
-            $result = $this->client()->recv();
-            $result = json_decode($result, true);
-            return $result['code'] == 200 ? $result['data'] : '';
-        } catch (ConnectFailExceptions $e) {
-            return '';
-        }
+        $result = $this->sendCommand(TimerClientProtocols::CMD_PUSH, $payload);
+        return ($result && $result['code'] == 200) ? $result['data'] : '';
     }
 
+    /**
+     * delete a delay message
+     * @param ProducerData $payload
+     * @return bool
+     */
     public function del(ProducerData $payload): bool
     {
-        try {
-            $protocols = new TimerClientProtocols();
-            $protocols->setCMD(TimerClientProtocols::CMD_DEL);
-            $protocols->setPayload($payload);
-            $this->client()->send(serialize($protocols) . "\r\n");
-            $result = $this->client()->recv();
-            $result = json_decode($result, true);
-            return $result['code'] == 200 ? true : false;
-        } catch (ConnectFailExceptions $e) {
-            return false;
-        }
+        $result = $this->sendCommand(TimerClientProtocols::CMD_DEL, $payload);
+        return ($result && $result['code'] == 200) ? true : false;
     }
+
 
 }
