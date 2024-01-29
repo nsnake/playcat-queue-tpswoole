@@ -6,6 +6,7 @@ use Playcat\Queue\Protocols\ConsumerDataInterface;
 use Playcat\Queue\Driver\DriverInterface;
 use Playcat\Queue\Protocols\ProducerDataInterface;
 use think\facade\Config;
+use Playcat\Queue\TimerClient\SwooleScoket;
 
 class Manager implements DriverInterface
 {
@@ -27,10 +28,10 @@ class Manager implements DriverInterface
         $this->config = Config::get('playcatqueue.Manager');
     }
 
-    protected function getTimeClient(): TimerClient
+    protected function getTimeClient(): SwooleScoket
     {
         if (!$this->timer_client) {
-            $this->timer_client = TimerClient::getInstance(['timerserver' => $this->config['timerserver']]);
+            $this->timer_client = new SwooleScoket(['timerserver' => $this->config['timerserver']]);
         }
         return $this->timer_client;
     }
