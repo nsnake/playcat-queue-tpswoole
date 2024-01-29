@@ -99,7 +99,7 @@ class 你的文件名 implements ConsumerInterface
 `php think playcatqueue:timerserver start`
 
 停止：
-`php think playcatqueue:consumerservice stop`
+`php think playcatqueue:timerserver stop`
 
 如果没有错误出现则服务端启动完成
 
