@@ -13,7 +13,7 @@ use think\Exception;
 use think\facade\Config;
 use ErrorException;
 use Playcat\Queue\Protocols\ProducerData;
-use Playcat\Queue\Protocols\TimerClientProtocols;
+use Playcat\Queue\TimerClient\TimerClientProtocols;
 use Playcat\Queue\Tpswoole\Process\ProcessManager;
 use Playcat\Queue\Tpswoole\Manager;
 use Playcat\Queue\TimerServer\Storage;
