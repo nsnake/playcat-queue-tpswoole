@@ -31,7 +31,7 @@ $ composer require "playcat/queue-tpswoole"
 ### 1.配置
 
 #### 1.1
-编辑TP项目下的*config\playcatqueue.php*文件,修改对应的信息为你自己对应的配置。
+编辑TP项目下的*config\playcatqueue.php*文件,修改对应的信息为你自己对应的配置。如果你使用过1.4之前的版本需要手动对比下配置文件或者重新用新的配置文件格式来覆盖
 
 #### 1.2 导入数据库
 根据TimerServer的下的storage type来决定使用的数据库。
@@ -78,10 +78,10 @@ class 你的文件名 implements ConsumerInterface
 #### 将上面编写好的任务文件保存到'*app/queue/playcat/*'目录下。如果目录不存在就创建它
 
 
-####启动服务:
+#### 启动服务:
 队列服务分为2个主服务。一个为即时消费服务，另一个为定时消费服务。可以在一台机器上同时启用消费和计时服务,也可以只启用消费服务端而和其它机器使用共同的定时消费服务端。
 
-#### 即时消费服务
+#### 消费服务
 
 启动:
 `php think playcatqueue:consumerservice start`
@@ -93,7 +93,7 @@ class 你的文件名 implements ConsumerInterface
 `php think playcatqueue:consumerservice stop`
 
 
-#### 定时消费服务,不启动将无法延迟任务
+#### 定时服务,该服务不启动将无法使用延迟任务
 
 启动：
 `php think playcatqueue:timerserver start`
@@ -103,11 +103,12 @@ class 你的文件名 implements ConsumerInterface
 
 如果没有错误出现则服务端启动完成
 
-### 添加任务并发布到队列中
+### 添加任务并且提交到队列中
 
 ```php
 use Playcat\Queue\Manager;
 use Playcat\Queue\Protocols\ProducerData;
+//使用协程的方式,如果需要同时进行大批量的数据发布需要自行实现Manager的连接池
 go(function () {
   //即时消费消息
   $payload = new ProducerData();
@@ -147,7 +148,7 @@ go(function () {
 
 注意：所有执行的消费任务默认是开启协程并且不可关闭的。由于与常规模式执行有点区别,所以可能出现一些不是预期的情况。如果没有接触过协程或开发过程中发现问题建议先看下swoole的相关文档。
 
-如果你使用过1.4之前的版本并且升级到现在版本，配置文件有点新的变化,可自行对照修改
+
 
 基于webman的playcat queue
 [playcat-queue ](https://github.com/nsnake/playcat-queue)
