@@ -40,7 +40,7 @@ $ composer require "playcat/queue-tpswoole"
 
 如使用mysql(推荐)。则导入`vendor\playcat\queue-base\db\playcatqueue.sql`创建对应数据库
 
-### 2.创建你自己消费者任务
+### 2.创建消费任务
 
 #### 新建一个php的文件并且添加以下内容:
 
@@ -52,16 +52,19 @@ namespace app\queue\playcat;
 use Playcat\Queue\Protocols\ConsumerDataInterface;
 use Playcat\Queue\Protocols\ConsumerInterface;
 
-class 你的文件名 implements ConsumerInterface
+class playcatConsumer1 implements ConsumerInterface
 {
     //任务名称，对应发布消息的名称
-    public $queue = 'test';
+    public $queue = 'playcatqueue';
 
     public function consume(ConsumerData $payload)
     {
         //获取发布到队列时传入的内容
         $data = $payload->getQueueData();
-        //sendsms or sendmail and so on.
+        ...你自己的业务逻辑
+        //休息10s,其它协程会继续自己的工作
+        \Swoole\Coroutine\System::sleep(10);
+        echo('done!');
     }
 }
 
