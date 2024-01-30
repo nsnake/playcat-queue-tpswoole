@@ -5,17 +5,14 @@ namespace Playcat\Queue\Tpswoole;
 use Playcat\Queue\Protocols\ConsumerDataInterface;
 use Playcat\Queue\Driver\DriverInterface;
 use Playcat\Queue\Protocols\ProducerDataInterface;
+use Playcat\Queue\TimerClient\TimerClientInterface;
 use think\facade\Config;
 use Playcat\Queue\TimerClient\SwooleScoket;
+use Playcat\Queue\Manager\Base;
 
-class Manager implements DriverInterface
+class Manager extends Base
 {
-    protected static $instance;
-    private $config;
-    private $driver;
-    private $timer_client;
-
-    public static function getInstance(): self
+    final public static function getInstance(): self
     {
         if (!self::$instance instanceof self) {
             self::$instance = new self();
@@ -25,70 +22,15 @@ class Manager implements DriverInterface
 
     public function __construct()
     {
-        $this->config = Config::get('playcatqueue.Manager');
+        $this->manager_config = Config::get('playcatqueue.Manager');
     }
 
     protected function getTimeClient(): SwooleScoket
     {
-        if (!$this->timer_client) {
-            $this->timer_client = new SwooleScoket(['timerserver' => $this->config['timerserver']]);
+        if (!$this->tc) {
+            $this->tc = new SwooleScoket(['timerserver' => $this->manager_config['timerserver']]);
         }
-        return $this->timer_client;
-    }
-
-    protected function getProducer(): DriverInterface
-    {
-        if (!$this->driver
-            || !$this->driver instanceof DriverInterface) {
-            $driver_name = [];
-            switch ($this->config['driver']) {
-                case 'Playcat\Queue\Driver\Rediscluster':
-                    $driver_name = Config::get('playcatqueue.Rediscluster');
-                    break;
-                case 'Playcat\Queue\Driver\Kafka':
-                    $driver_name = Config::get('playcatqueue.Kafka');
-                    break;
-                case 'Playcat\Queue\Driver\RabbitMQ':
-                    $driver_name = Config::get('playcatqueue.Rabbitmq');
-                    break;
-                default:
-                    $driver_name = Config::get('playcatqueue.Redis');
-            }
-            $this->driver = new $this->config['driver']($driver_name);
-        }
-        return $this->driver;
-    }
-
-    public function setIconicId(int $iconic_id = 0): void
-    {
-        $this->getProducer()->setIconicId($iconic_id);
-    }
-
-    public function subscribe(array $channels): bool
-    {
-        return $this->getProducer()->subscribe($channels);
-    }
-
-
-    public function shift(): ?ConsumerDataInterface
-    {
-        return $this->getProducer()->shift();
-    }
-
-    public function push(ProducerDataInterface $payload): ?string
-    {
-        return $payload->getDelayTime() > 0
-            ? $this->getTimeClient()->push($payload) : $this->getProducer()->push($payload);
-    }
-
-    public function consumerFinished(): bool
-    {
-        return $this->getProducer()->consumerFinished();
-    }
-
-    public function del(ProducerDataInterface $payload): bool
-    {
-        return $this->getTimeClient()->del($payload);
+        return $this->tc;
     }
 
 }
