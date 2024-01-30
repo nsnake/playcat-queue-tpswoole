@@ -6,13 +6,13 @@
     {
       "name": "CGI.NET",
       "email": "root@playcat.net",
-      "homepage": "https://blog.playcat.net"
+      "homepage": "https://github.com/nsnake/playcat-queue-tpswoole"
     }
   ],
   "require": {
     "php": ">7.2",
     "topthink/framework": "^6.0",
-    "playcat/queue-base": "^1.3"
+    "playcat/queue-base": "^1.4"
   },
   "require-dev": {
     "swoole/ide-helper": "^4.3"
