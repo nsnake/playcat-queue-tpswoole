@@ -28,7 +28,9 @@ class Manager extends Base
     protected function getTimeClient(): SwooleScoket
     {
         if (!$this->tc) {
-            $this->tc = new SwooleScoket(['timerserver' => $this->manager_config['timerserver']]);
+            $this->tc = new SwooleScoket([
+                'timerserver' => $this->manager_config['timerserver']
+            ]);
         }
         return $this->tc;
     }
