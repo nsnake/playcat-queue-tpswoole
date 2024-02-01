@@ -130,6 +130,8 @@ go(function () {
   $payload_delay->setDelayTime(60);
   //推入队列并且获取消息id
   $id = Manager::getInstance()->push($payload_delay);
+  //取消延迟消息
+  Manager::getInstance()->del($id);
  });
 ```
 
