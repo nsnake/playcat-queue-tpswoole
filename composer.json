@@ -6,13 +6,15 @@
     {
       "name": "CGI.NET",
       "email": "root@playcat.net",
-      "homepage": "https://github.com/nsnake/playcat-queue-tpswoole"
+      "homepage": "https://blog.playcat.net"
     }
   ],
+  "homepage": "https://github.com/nsnake/playcat-queue-tpswoole",
   "require": {
     "php": ">7.2",
     "topthink/framework": "^6.0",
-    "playcat/queue-base": "^1.4"
+    "playcat/queue-base": "^1.4",
+    "ext-swoole": ">=4.8"
   },
   "require-dev": {
     "swoole/ide-helper": "^4.3"
@@ -24,6 +26,13 @@
     "files": [
     ]
   },
+  "scripts": {
+    "post-install-cmd": [
+      "@php bin/install.php"
+    ],
+    "post-update-cmd": [
+    ]
+  },
   "extra": {
     "think": {
       "services": [
@@ -33,10 +42,6 @@
         "playcatqueue": "src/Config/playcatqueue.php"
       }
     }
-  },
-  "suggest": {
-    "php": ">=7.1",
-    "ext-swoole": ">=4.8"
   },
   "config": {
     "preferred-install": "dist",

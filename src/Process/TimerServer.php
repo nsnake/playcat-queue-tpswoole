@@ -96,15 +96,17 @@ class TimerServer extends ProcessManager
         $this->setPid(posix_getpid());
         $pool = new Process\Pool(1);
         $pool->set([
-            'enable_coroutine' => true,
-            'open_eof_check' => true,
-            'package_eof' => "\r\n"
+            'enable_coroutine' => true
         ]);
         $pool->on('workerStart', function ($pool, $workerid) use ($config) {
             @cli_set_process_title('playcatQueueTimerServer: worker process');
             $this->iconic_id = $workerid;
             $this->loadUndoJobs();
             $server = new \Swoole\Coroutine\Server($config['bind_ip'], $config['bind_port'], false, true);
+            $server->set([
+                'open_eof_check' => true,
+                'package_eof' => "\r\n"
+            ]);
             Process::signal(SIGTERM, function () use ($server) {
                 $server->shutdown();
             });
