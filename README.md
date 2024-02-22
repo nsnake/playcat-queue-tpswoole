@@ -12,13 +12,13 @@
 - 延迟消息数据持久化，重启TimerServer将不再丢失未完成的任务
 - 支持延迟消息的删除
 
-## 扩展要求
+## 依赖要求
 
 - PHP >= 7.2
 - Swoole >= 4.8.13
-- PHP Redis扩展 (redis)
-- PHP RdKafka扩展 (kafka)
-- PHP php-amqplib/php-amqplib(RabbitMQ)
+- Redis 
+- RdKafka
+- php-amqplib/php-amqplib
 
 ## 安装
 在Thinkphp项目下执行
@@ -31,7 +31,8 @@ $ composer require "playcat/queue-tpswoole"
 ### 1.配置
 
 #### 1.1
-编辑TP项目下的*config\playcatqueue.php*文件,修改对应的信息为你自己对应的配置。如果你使用过1.4之前的版本需要手动对比下配置文件或者重新用新的配置文件格式来覆盖
+修改TP项目下*config\playcatqueue.php*文件,按说明修改为自己环境的配置。
+如果你使用过1.4之前的版本需要手动对比下配置文件或直接使用新配置格式的文件。
 
 #### 1.2 导入数据库
 根据TimerServer的下的storage type来决定使用的数据库。
@@ -78,13 +79,13 @@ class playcatConsumer1 implements ConsumerInterface
 - getChannel(): 当前所执行的任务名称
 - - -
 
-#### 将上面编写好的任务文件保存到'*app/queue/playcat/*'目录下。如果目录不存在就创建它
+#### 将上面编写好的任务文件保存TP项目中'*app/queue/playcat/*'下(如果目录不存在则自己手动创建)
 
 
 #### 启动服务:
 队列服务分为2个主服务。一个为即时消费服务，另一个为定时消费服务。可以在一台机器上同时启用消费和计时服务,也可以只启用消费服务端而和其它机器使用共同的定时消费服务端。
 
-#### 消费服务
+#### 消费者服务
 
 启动:
 `php think playcatqueue:consumerservice start`
@@ -96,7 +97,7 @@ class playcatConsumer1 implements ConsumerInterface
 `php think playcatqueue:consumerservice stop`
 
 
-#### 定时服务,该服务不启动将无法使用延迟任务
+#### 延迟任务服务
 
 启动：
 `php think playcatqueue:timerserver start`
@@ -104,14 +105,14 @@ class playcatConsumer1 implements ConsumerInterface
 停止：
 `php think playcatqueue:timerserver stop`
 
-如果没有错误出现则服务端启动完成
+如果没有错误出现则表示启动完成
 
 ### 添加任务并且提交到队列中
 
 ```php
 use Playcat\Queue\Manager;
 use Playcat\Queue\Protocols\ProducerData;
-//使用协程的方式,如果需要同时进行大批量的数据发布需要自行实现Manager的连接池
+//使用协程的方式,如果需要并行数据发布需要自行实现Manager的连接池
 go(function () {
   //即时消费消息
   $payload = new ProducerData();
