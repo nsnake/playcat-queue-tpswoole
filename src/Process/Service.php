@@ -8,6 +8,7 @@ class Service extends \think\Service
     public function boot()
     {
         $this->commands([
+            InstallServer::class,
             ConsumerService::class,
             TimerServer::class
         ]);
