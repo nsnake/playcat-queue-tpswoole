@@ -2,6 +2,7 @@
 
 namespace Playcat\Queue\Tpswoole\Process;
 
+use Playcat\Queue\Install\InitDB;
 use Swoole\Timer;
 use Swoole\Process;
 use Swoole\Coroutine;
@@ -27,7 +28,7 @@ class TimerServer extends ProcessManager
     public function configure(): void
     {
         $this->setName('playcatqueue:timerserver')
-            ->addArgument('action', Argument::OPTIONAL, 'start|stop', 'start')
+            ->addArgument('action', Argument::OPTIONAL, 'start|stop|initdb', 'start')
             ->setDescription('');
     }
 
@@ -46,10 +47,10 @@ class TimerServer extends ProcessManager
     public function handle(): void
     {
         $action = $this->input->getArgument('action');
-        if (in_array($action, ['start', 'stop'])) {
+        if (in_array($action, ['start', 'stop', 'initdb'])) {
             $this->app->invokeMethod([$this, $action], [], true);
         } else {
-            $this->output->error("Invalid argument action:{$action}, Expected start|stop");
+            $this->output->error("Invalid argument action:{$action}, Expected start|stop|initdb");
         }
     }
 
@@ -211,6 +212,30 @@ class TimerServer extends ProcessManager
                 $this->cmdPush($payload);
             }
             $this->storage->delData($job['jid']);
+        }
+    }
+
+    /**
+     * @return void
+     */
+    private function initdb(): void
+    {
+        $this->output->writeln('Starting playcat queue database initial...');
+        $this->output->writeln('You can exit with <info>`CTRL-C`</info>');
+        $db = new InitDB($this->config['storage']);
+        $result = false;
+        if ($this->config['storage']['type'] == strtolower('mysql')) {
+            $result = $db->initMysql();
+        } elseif ($this->config['storage']['type'] == strtolower('sqlite')) {
+            $result = $db->initSqlite();
+        } else {
+            $this->output->error("Unsupported database");
+            return;
+        }
+        if ($result) {
+            $this->output->writeln('Initialized successfully！');
+        } else {
+            $this->output->error("Initialized failed！");
         }
     }
 }
