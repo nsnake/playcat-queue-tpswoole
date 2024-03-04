@@ -235,7 +235,7 @@ class TimerServer extends ProcessManager
         if ($result) {
             $this->output->writeln('Initialized successfully！');
         } else {
-            $this->output->error("Initialized failed！");
+            $this->output->error("Initialized failed！ Maybe already have it！");
         }
     }
 }
