@@ -2,23 +2,23 @@
 <h1 align="center">Playcat\Queue\Tpswoole</h1>
 
 <p align="center">基于Thinkphp6+和Swoole4+协程的消息队列服务
-支持 Redis、Kafka 和 RabbitMQ。 支持延迟消息和异常重试</p>
+支持 Redis、Kafka 和 RabbitMQ等多种驱动，自带延迟消息和异常重试，开发简单</p>
 
 ## 特性
 
-- Redis单机或集群 (redis >= 5.0)
-- Kafka 
-- RabbitMQ
-- 延迟消息数据持久化，重启TimerServer将不再丢失未完成的任务
-- 支持延迟消息的删除
+- 支持Redis单机或集群 (redis >= 5.0)
+- 支持Kafka
+- 支持RabbitMQ
+- 支持延迟消息数据持久化
+- 自定义异常与重试流程
 
-## 依赖要求
+## 模块与版本
 
 - PHP >= 7.2
-- Swoole >= 4.8.13
-- Redis 
-- RdKafka
-- php-amqplib/php-amqplib
+- Swoole扩展 >= 4.8.13
+- Redis扩展
+- RdKafka扩展
+- php-amqplib/php-amqplib扩展
 
 ## 安装
 在Thinkphp项目下执行
@@ -31,15 +31,14 @@ $ composer require "playcat/queue-tpswoole"
 ### 1.配置
 
 #### 1.1
-修改TP项目下*config\playcatqueue.php*文件,按说明修改为自己环境的配置。
-如果你使用过1.4之前的版本需要手动对比下配置文件或直接使用新配置格式的文件。
+编辑TP目录下的*config\playcatqueue.php*文件,编辑相应内容为自己环境使用的配置。
+如果你使用过1.4之前的版本需要手动对比下配置文件或使用新格式的重新配置一次。
 
-#### 1.2 导入数据库
-根据TimerServer的下的storage type来决定使用的数据库。
+#### 1.2 初始化数据库(只需一次)
 
-如果使用sqlite则拷贝`vendor\playcat\queue-base\db\playcatqueue`到你希望的的路径,例如`/opt/playcatqueue`,并修改`database`字段的类容为`/opt/playcatqueue`.
-
-如使用mysql(推荐)。则导入`vendor\playcat\queue-base\db\playcatqueue.sql`创建对应数据库
+```
+php think playcatqueue:timerserver initdb
+```
 
 ### 2.创建消费任务
 
@@ -152,7 +151,7 @@ go(function () {
 
 ### 其它
 
-注意：所有执行的消费任务默认是开启协程并且不可关闭的。由于与常规模式执行有点区别,所以可能出现一些不是预期的情况。如果没有接触过协程或开发过程中发现问题建议先看下swoole的相关文档。
+注意：所有执行的消费任务默认是开启协程并且不可关闭的。由于与常规模式执行有点区别,所以可能出现一些不是预期的情况（例如mysql和redis在协程下的复用问题）。如果没有接触过协程或开发过程中发现问题建议先看下swoole的相关文档。
 
 
 
