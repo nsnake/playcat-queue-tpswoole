@@ -132,7 +132,7 @@ class ConsumerService extends ProcessManager
                 return;
             }
             $manager->subscribe(array_keys($consumers));
-            Log::info('Start Playcat Queue Consumer Service!');
+            Log::info('Start Consumer Service!');
 
             $this->pull_timing = Timer::tick(100, function () use ($manager, $consumers, $config, &$running, $pool) {
                 //进程退出消息
