@@ -102,6 +102,7 @@ class TimerServer extends ProcessManager
             'enable_coroutine' => true
         ]);
         $pool->on('workerStart', function ($pool, $workerid) use ($config) {
+            Log::info('Start Timerserver!');
             @cli_set_process_title('playcatQueueTimerServer: worker process');
             $this->iconic_id = $workerid;
             $this->loadUndoJobs();
@@ -126,6 +127,7 @@ class TimerServer extends ProcessManager
                     try {
                         $protocols = unserialize($data);
                     } catch (Exception $e) {
+                        Log::critical($e->getMessage());
                         $connection->send($this->resultData($result, 401, 'Unsupported protocols!'));
                         $connection->close();
                         break;
@@ -202,7 +204,9 @@ class TimerServer extends ProcessManager
      */
     private function loadUndoJobs(): void
     {
+        Log::info('Load unfinished jobs！');
         $jobs = $this->storage->getHistoryJobs();
+        Log::debug('Unfinished jobs:' . count($jobs));
         foreach ($jobs as $job) {
             $left_time = $job['expiration'] - time();
             $payload = $job['data'];
@@ -215,6 +219,7 @@ class TimerServer extends ProcessManager
             }
             $this->storage->delData($job['jid']);
         }
+        Log::info('Load unfinished jobs complete！');
     }
 
     /**
