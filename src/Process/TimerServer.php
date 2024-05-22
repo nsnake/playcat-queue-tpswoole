@@ -3,6 +3,7 @@
 namespace Playcat\Queue\Tpswoole\Process;
 
 use Playcat\Queue\Install\InitDB;
+use Playcat\Queue\Log\Log;
 use Swoole\Timer;
 use Swoole\Process;
 use Swoole\Coroutine;
@@ -39,6 +40,7 @@ class TimerServer extends ProcessManager
         $this->manager = Manager::getInstance();
         $this->storage = new Storage();
         $this->storage->setDriver($this->config['storage']);
+        Log::setLogHandle(\think\facade\Log::class);
     }
 
     /**

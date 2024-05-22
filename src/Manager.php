@@ -2,6 +2,7 @@
 
 namespace Playcat\Queue\Tpswoole;
 
+use Playcat\Queue\Log\Log;
 use Playcat\Queue\Protocols\ConsumerDataInterface;
 use Playcat\Queue\Driver\DriverInterface;
 use Playcat\Queue\Protocols\ProducerDataInterface;
@@ -23,6 +24,7 @@ class Manager extends Base
     public function __construct()
     {
         $this->manager_config = Config::get('playcatqueue.Manager');
+        Log::setLogHandle(\think\facade\Log::class);
     }
 
     protected function getTimeClient(): SwooleScoket

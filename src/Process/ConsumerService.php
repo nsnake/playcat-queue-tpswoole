@@ -26,6 +26,7 @@ use Playcat\Queue\Protocols\ConsumerData;
 use Playcat\Queue\Protocols\ProducerData;
 use Playcat\Queue\Tpswoole\Manager;
 use Exception;
+use Playcat\Queue\Log\Log;
 
 class ConsumerService extends ProcessManager
 {
@@ -53,6 +54,7 @@ class ConsumerService extends ProcessManager
             return;
         }
         $this->setPidFile($this->config['pid_file']);
+        Log::setLogHandle(\think\facade\Log::class);
     }
 
     /**
@@ -124,10 +126,13 @@ class ConsumerService extends ProcessManager
             try {
                 $consumers = $this->loadWorkTask($config['consumer_dir']);
             } catch (Exception $e) {
-                $this->output->error('Error while loading consumers: ' . $e->getMessage());
+                $message = 'Error while loading consumers: ' . $e->getMessage();
+                Log::emergency($message);
+                $this->output->error($message);
                 return;
             }
             $manager->subscribe(array_keys($consumers));
+            Log::info('Start Playcat Queue Consumer Service!');
 
             $this->pull_timing = Timer::tick(100, function () use ($manager, $consumers, $config, &$running, $pool) {
                 //进程退出消息
@@ -148,7 +153,7 @@ class ConsumerService extends ProcessManager
                                 call_user_func([$consumers[$payload->getChannel()], 'consume'], $payload);
                             });
                         } catch (QueueDontRetry $e) {
-
+                            Log::alert('Caught an exception but not need retry it!', $payload->getQueueData());
                         } catch (Exception $e) {
                             if (isset($config['max_attempts'])
                                 && $config['max_attempts'] > 0
@@ -190,6 +195,7 @@ class ConsumerService extends ProcessManager
                 $consumer = Container::instance()->get($class);
                 $channel = $consumer->queue;
                 $consumers[$channel] = $consumer;
+                Log::debug('Load task name:' . $channel);
             }
         }
         return $consumers;
