@@ -125,6 +125,7 @@ class TimerServer extends ProcessManager
                     }
 
                     try {
+                        $data = trim($data);
                         $protocols = unserialize($data);
                     } catch (Exception $e) {
                         Log::critical($e->getMessage());
